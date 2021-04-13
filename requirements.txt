@@ -2,7 +2,7 @@
 # -e .
 
 # external requirements
-elasticdeform @ git+https://github.com/gvtulder/elasticdeform@07e192add0ba2d92ef8529a6b600e20ecb109888
+elasticdeform==0.4.9
 h5py==2.10.0
 Keras==2.3.1
 Keras-Applications==1.0.8
@@ -17,15 +17,12 @@ scikit-learn==0.23.1
 scipy==1.4.1
 seaborn==0.10.1
 SimpleITK==1.2.4
-tensorflow==2.1.0
-tensorflow-estimator==2.1.0
-tensorflow-gpu==2.1.0
-tensorflow-tensorboard==1.5.1
 torch==1.5.0
 torchsummary==1.5.1
 torchvision==0.6.0
 tox==3.18.0
 tqdm==4.46.0
+docutils==0.15.2
 
 # other external requirements
 click
