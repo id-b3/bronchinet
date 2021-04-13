@@ -8,7 +8,7 @@ from common.functionutil import makedir, removefile, removedir, join_path_names,
 from common.exceptionmanager import catch_error_exception
 from dataloaders.imagefilereader import ImageFileReader, NiftiReader, DicomReader
 
-bin_dicom2nifti = '/home/antonio/Libraries/mricron_dcm2niix/dcm2niix'
+bin_dicom2nifti = 'dcm2niix'
 bin_dicom2nifti_auxdecomp = 'dcmdjpeg'
 bin_hr22nifti = '/home/antonio/Codes/Silas_repository/image-feature-extraction/build/tools/ConvertHR2'
 
@@ -31,13 +31,13 @@ def main(args):
         tmpsubdir = join_path_names(args.input_dir, 'tmp')
         makedir(tmpsubdir)
 
-        if not is_exist_exec(bin_dicom2nifti):
-            message = 'Executable to convert dicom to nifti not found in: %s' % (bin_dicom2nifti)
-            catch_error_exception(message)
+#        if not is_exist_exec(bin_dicom2nifti):
+#            message = 'Executable to convert dicom to nifti not found in: %s' % (bin_dicom2nifti)
+#            catch_error_exception(message)
 
-        if not is_exists_hexec(bin_dicom2nifti_auxdecomp):
-            message = 'Executable to decompress dicom not found in: %s' % (bin_dicom2nifti_auxdecomp)
-            catch_error_exception(message)
+#        if not is_exists_hexec(bin_dicom2nifti_auxdecomp):
+#            message = 'Executable to decompress dicom not found in: %s' % (bin_dicom2nifti_auxdecomp)
+#            catch_error_exception(message)
 
     elif files_extension == '.hr2':
         files_type = 'hr2'
