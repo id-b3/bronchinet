@@ -184,7 +184,7 @@ def get_network(type_network: str,
                             num_classes_out=num_classes_out,
                             is_use_valid_convols=is_use_valid_convols)
     else:
-        message = 'Choice Network not found: %s. Networks available: %s' \
+        message = 'Choice Network not found: %s. Networks available: %s. Please check if you have set is_backward_compat to True if using a pre-trained model.' \
                   % (type_network, ', '.join(LIST_AVAIL_NETWORKS))
         catch_error_exception(message)
 

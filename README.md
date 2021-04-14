@@ -126,7 +126,7 @@ Test models
 - rm -r <path_output_predictions>
 
 4) [IF NEEDED] Compute largest connected component of airway binary masks:
-- python ./Code/scripts_util/apply_operation_images.py <path_output_binmasks> <path_output_conn_binmasks> --type=firstconreg
+- python ./Code/scripts_util/apply_operation_images.py <path_output_binmasks> <path_output_conn_binmasks> --type=firstconreg --in_conreg_dim=3
 - rm -r <path_output_binmasks> && mv <path_output_conn_binmasks> <path_output_binmasks>
 
 5) Compute centrelines from airway binary masks:
