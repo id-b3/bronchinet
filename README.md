@@ -89,6 +89,16 @@ Create working directory
 - ln -s <path_data_stored> BaseData
 - ln -s <path_thiscode_stored> Code
 
+<path_data_stored> should have the folder structure of:
+<path_data_stored>
+    |
+    |--> Airways       - Ground truth segmentations of airways for training the model.
+    |--> CoarseAirways - Coarse segmentations containing the trachea and main bronchi, segmentation must be labeled per branch i.e trachea = 1, main right bronchi = 2 etc.
+    |--> Images        - CT scan(s) to be used in training or prediction.
+    |--> Lungs         - Masks of the lungs.
+
+    All images in the folders should be in the NIFTY format. Use the ./scripts_util/convert_dicom_to_nifty.py script to convert dicom files.
+
 [IF NEEDED] (include in "~/.bashrc" file: export PYTHONPATH=<path_thiscode_stored>/src/")
 
 Prepare data
