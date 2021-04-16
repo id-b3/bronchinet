@@ -1,0 +1,3 @@
+[submodule "airflow"]
+	path = airflow
+	url = https://github.com/id-b3/AirFlow.git
