@@ -14,7 +14,7 @@ from common.functionutil import currentdir, makedir, set_filename_suffix, set_di
 from common.exceptionmanager import catch_error_exception
 from common.workdirmanager import TrainDirManager
 
-CODEDIR = join_path_names(BASEDIR, 'Code/')
+CODEDIR = join_path_names(currentdir(), 'Code/')
 SCRIPT_PREDICT_MODEL = join_path_names(CODEDIR, 'scripts_experiments/predict_model.py')
 SCRIPT_MERGE_DICTIONARIES_PREDS = join_path_names(CODEDIR, 'scripts_evalresults/merge_pydictionaries_preds.py')
 SCRIPT_POSTPROCESS_PREDICTIONS = join_path_names(CODEDIR, 'scripts_evalresults/postprocess_predictions.py')
@@ -46,7 +46,7 @@ def create_task_replace_dirs(input_dir, input_dir_to_replace):
 def main(args):
 
     inputdir = dirname(args.input_model_file)
-    basedir = currentdir()
+    basedir = dirname(args.base_dir)
 
     # output_basedir = update_dirname(args.output_basedir)
     output_basedir = args.output_basedir
@@ -277,6 +277,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('input_model_file', type=str)
     parser.add_argument('output_basedir', type=str)
+    parser.add_argument('--base_dir', type=str, default=BASEDIR)
     parser.add_argument('--testing_datadir', type=str, default=NAME_TESTINGDATA_RELPATH)
     parser.add_argument('--is_preds_crossval', type=str2bool, default=False)
     parser.add_argument('--is_mask_region_interest', type=str2bool, default=IS_MASK_REGION_INTEREST)
