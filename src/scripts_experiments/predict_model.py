@@ -6,11 +6,11 @@ import argparse
 from common.constant import BASEDIR, NAME_TESTINGDATA_RELPATH, SIZE_IN_IMAGES, PROP_OVERLAP_SLIDING_WINDOW_TEST, \
     IS_SLIDING_WINDOW_IMAGES, IS_RANDOM_WINDOW_IMAGES, TYPE_LOSS, LIST_TYPE_METRICS, IS_VALID_CONVOLUTIONS, \
     IS_MASK_REGION_INTEREST, NAME_TEMPO_POSTERIORS_RELPATH, NAME_REFERENCE_KEYS_PROCIMAGE_FILE, \
-    NAME_REFERENCE_KEYS_POSTERIORS_FILE, IS_FILTER_OUT_PROBMAPS_NNET, PROP_FILTER_OUT_PROBMAPS_NNET, TYPE_DNNLIB_USED
+    NAME_REFERENCE_KEYS_POSTERIORS_FILE, TYPE_DNNLIB_USED
 from common.functionutil import join_path_names, is_exist_file, basename, basename_filenoext, list_files_dir, \
-    str2bool, str2float, str2list_str, str2tuple_int, str2tuple_float, read_dictionary, read_dictionary_configparams, \
-    save_dictionary, save_dictionary_csv
-from common.exceptionmanager import catch_error_exception
+    str2bool, str2list_str, str2tuple_int, str2tuple_float, read_dictionary, read_dictionary_configparams, \
+    save_dictionary, save_dictionary_csv, NetworksUtil
+from common.exceptionmanager import catch_error_exception, catch_warning_exception
 from common.workdirmanager import TrainDirManager
 from dataloaders.dataloader_manager import get_train_imagedataloader_1image
 from dataloaders.imagefilereader import ImageFileReader
@@ -66,7 +66,7 @@ def main(args):
     # model_trainer.summary_model()
 
     if args.is_save_featmaps_layer:
-        print("Compute and store Feature Maps from the Model layer \'%s\'..." % (args.name_layer_save_feats))
+        print("Compute and store Feature Maps from the Model layer \'%s\'..." % (args.name_layer_save_featmaps))
         network_checker = get_network_checker(args.size_in_images, model_trainer._network)
     else:
         network_checker = None
@@ -90,8 +90,8 @@ def main(args):
                                                         type_trans_elastic='',
                                                         is_nnet_validconvs=args.is_valid_convolutions,
                                                         size_output_images=size_output_image_model,
-                                                        is_filter_output_nnet=args.is_filter_out_probmaps_nnet,
-                                                        prop_filter_output_nnet=args.prop_filter_out_probmaps_nnet)
+                                                        is_filter_output_images=args.is_filter_output_network,
+                                                        size_filter_output_images=args.size_filter_output_images)
     else:
         images_reconstructor = None
 
@@ -126,7 +126,7 @@ def main(args):
 
         if args.is_save_featmaps_layer:
             print("Evaluate Model feature maps...")
-            out_prediction_patches = network_checker.get_feature_maps(image_data_loader, args.name_layer_save_feats)
+            out_prediction_patches = network_checker.get_feature_maps(image_data_loader, args.name_layer_save_featmaps)
         else:
             print("Evaluate Model...")
             out_prediction_patches = model_trainer.predict(image_data_loader)
@@ -157,7 +157,7 @@ def main(args):
             for ifeat in range(num_featmaps):
                 output_prediction_file = join_path_names(output_predictions_path,
                                                          name_output_prediction_files % (in_caseproc_name,
-                                                                                         args.name_layer_save_feats,
+                                                                                         args.name_layer_save_featmaps,
                                                                                          ifeat + 1))
                 print("Output: \'%s\', of dims \'%s\'..." % (basename(output_prediction_file),
                                                              out_prediction_reconstructed[..., ifeat].shape))
@@ -199,10 +199,9 @@ if __name__ == "__main__":
     parser.add_argument('--name_output_predictions_relpath', type=str, default=NAME_TEMPO_POSTERIORS_RELPATH)
     parser.add_argument('--name_input_reference_keys_file', type=str, default=NAME_REFERENCE_KEYS_PROCIMAGE_FILE)
     parser.add_argument('--name_output_reference_keys_file', type=str, default=NAME_REFERENCE_KEYS_POSTERIORS_FILE)
-    parser.add_argument('--is_filter_out_probmaps_nnet', type=str2bool, default=IS_FILTER_OUT_PROBMAPS_NNET)
-    parser.add_argument('--prop_filter_out_probmaps_nnet', type=str2float, default=PROP_FILTER_OUT_PROBMAPS_NNET)
+    parser.add_argument('--is_filter_output_network', type=str2bool, default=False)
     parser.add_argument('--is_save_featmaps_layer', type=str2bool, default=False)
-    parser.add_argument('--name_layer_save_feats', type=str, default=None)
+    parser.add_argument('--name_layer_save_featmaps', type=str, default=None)
     parser.add_argument('--is_backward_compat', type=str2bool, default=False)
     args = parser.parse_args()
 
@@ -222,6 +221,17 @@ if __name__ == "__main__":
             args.is_mask_region_interest = str2bool(input_args_file['is_mask_region_interest'])
             args.is_reconstruct_pred_patches = str2bool(input_args_file['is_sliding_window_images']) or \
                 str2bool(input_args_file['is_random_window_images'])
+
+    if args.is_valid_convolutions and not args.is_filter_output_network:
+        message = 'Testing network with non-valid convols: better to filter the network output to reduce border effects'
+        catch_warning_exception(message)
+
+    if args.is_filter_output_network:
+        print("Using the option to filter the network output to reduce border effects...")
+        args.size_filter_output_images = NetworksUtil.calc_size_output_layer_valid_convols(args.size_in_images)
+        print("Filtering the output images outside the window: %s..." % (str(args.size_filter_output_images)))
+    else:
+        args.size_filter_output_images = None
 
     print("Print input arguments...")
     for key, value in sorted(vars(args).items()):
