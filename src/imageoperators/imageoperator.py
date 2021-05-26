@@ -60,6 +60,21 @@ class CropImage(ImageOperator):
         return in_image[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
                         in_boundbox[2][0]:in_boundbox[2][1], ...]    # last dim for channels
 
+    @staticmethod
+    def _compute2d_channels_first(in_image: np.ndarray,
+                                  in_boundbox: BoundBox2DType
+                                  ) -> np.ndarray:
+        return in_image[...,  # first dim for channels
+                        in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1]]
+
+    @staticmethod
+    def _compute3d_channels_first(in_image: np.ndarray,
+                                  in_boundbox: BoundBox3DType
+                                  ) -> np.ndarray:
+        return in_image[...,  # first dim for channels
+                        in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
+                        in_boundbox[2][0]:in_boundbox[2][1]]
+
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
         is_image2d = kwargs['is_image_2D'] if 'is_image_2D' in kwargs.keys() else False
@@ -69,73 +84,73 @@ class CropImage(ImageOperator):
             return cls._compute3d(in_image, *args)
 
 
-class SetPatchInImage(ImageOperator):
+class SetImageInVolume(ImageOperator):
 
     @staticmethod
-    def _compute2d(in_image: np.ndarray, out_image: np.ndarray,
+    def _compute2d(in_image: np.ndarray, out_volume: np.ndarray,
                    in_boundbox: BoundBox2DType
                    ) -> np.ndarray:
-        out_image[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
-                  ...] = in_image   # last dim for channels
-        return out_image
+        out_volume[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
+                   ...] = in_image   # last dim for channels
+        return out_volume
 
     @staticmethod
-    def _compute_add2d(in_image: np.ndarray, out_image: np.ndarray,
-                       in_boundbox: BoundBox2DType
-                       ) -> np.ndarray:
-        out_image[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
-                  ...] += in_image  # last dim for channels
-        return out_image
-
-    @staticmethod
-    def _compute3d(in_image: np.ndarray, out_image: np.ndarray,
+    def _compute3d(in_image: np.ndarray, out_volume: np.ndarray,
                    in_boundbox: BoundBox3DType
                    ) -> np.ndarray:
-        out_image[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
-                  in_boundbox[2][0]:in_boundbox[2][1], ...] = in_image   # last dim for channels
-        return out_image
+        out_volume[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
+                   in_boundbox[2][0]:in_boundbox[2][1], ...] = in_image   # last dim for channels
+        return out_volume
 
     @staticmethod
-    def _compute_add3d(in_image: np.ndarray, out_image: np.ndarray,
-                       in_boundbox: BoundBox3DType
-                       ) -> np.ndarray:
-        out_image[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
-                  in_boundbox[2][0]:in_boundbox[2][1], ...] += in_image  # last dim for channels
-        return out_image
+    def _compute_adding2d(in_image: np.ndarray, out_volume: np.ndarray,
+                          in_boundbox: BoundBox2DType
+                          ) -> np.ndarray:
+        out_volume[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
+                   ...] += in_image  # last dim for channels
+        return out_volume
+
+    @staticmethod
+    def _compute_adding3d(in_image: np.ndarray, out_volume: np.ndarray,
+                          in_boundbox: BoundBox3DType
+                          ) -> np.ndarray:
+        out_volume[in_boundbox[0][0]:in_boundbox[0][1], in_boundbox[1][0]:in_boundbox[1][1],
+                   in_boundbox[2][0]:in_boundbox[2][1], ...] += in_image  # last dim for channels
+        return out_volume
 
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
         is_image2d = kwargs['is_image_2D'] if 'is_image_2D' in kwargs.keys() else False
-        is_calc_add = kwargs['is_calc_add'] if 'is_calc_add' in kwargs.keys() else False
+        is_calc_adding = kwargs['is_calc_adding'] if 'is_calc_adding' in kwargs.keys() else False
         if is_image2d:
-            if is_calc_add:
-                return cls._compute_add2d(in_image, *args)
+            if is_calc_adding:
+                return cls._compute_adding2d(in_image, *args)
             else:
                 return cls._compute2d(in_image, *args)
         else:
-            if is_calc_add:
-                return cls._compute_add3d(in_image, *args)
+            if is_calc_adding:
+                return cls._compute_adding3d(in_image, *args)
             else:
                 return cls._compute3d(in_image, *args)
 
 
-class CropImageAndSetPatchInImage(ImageOperator):
+class CropImageAndSetImageInVolume(ImageOperator):
 
     @staticmethod
-    def _compute2d(in_image: np.ndarray, out_image: np.ndarray,
+    def _compute2d(in_image: np.ndarray, out_volume: np.ndarray,
                    in_crop_boundbox: BoundBox2DType,
                    in_extend_boundbox: BoundBox2DType
                    ) -> np.ndarray:
-        return SetPatchInImage._compute2d(CropImage._compute2d(in_image, in_crop_boundbox),
-                                          out_image, in_extend_boundbox)
+        return SetImageInVolume._compute2d(CropImage._compute2d(in_image, in_crop_boundbox),
+                                           out_volume, in_extend_boundbox)
 
     @staticmethod
-    def _compute3d(in_image: np.ndarray, out_image: np.ndarray,
+    def _compute3d(in_image: np.ndarray, out_volume: np.ndarray,
                    in_crop_boundbox: BoundBox3DType,
                    in_extend_boundbox: BoundBox3DType
                    ) -> np.ndarray:
-        return SetPatchInImage._compute3d(CropImage._compute3d(in_image, in_crop_boundbox),
-                                          out_image, in_extend_boundbox)
+        return SetImageInVolume._compute3d(CropImage._compute3d(in_image, in_crop_boundbox),
+                                           out_volume, in_extend_boundbox)
 
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -153,7 +168,7 @@ class ExtendImage(ImageOperator):
                          out_dtype: np.dtype,
                          value_backgrnd: float = None
                          ) -> np.ndarray:
-        if value_backgrnd is None:
+        if value_backgrnd is None or (value_backgrnd == 0.0):
             return np.zeros(size_output, dtype=out_dtype)
         else:
             return np.full(size_output, value_backgrnd, dtype=out_dtype)
@@ -167,9 +182,9 @@ class ExtendImage(ImageOperator):
         if value_backgrnd is None:
             value_backgrnd = in_image[0][0]
 
-        out_image = cls._get_init_output(size_output, in_image.dtype, value_backgrnd)
-        SetPatchInImage._compute2d(in_image, out_image, in_boundbox)
-        return out_image
+        out_volume = cls._get_init_output(size_output, in_image.dtype, value_backgrnd)
+        SetImageInVolume._compute2d(in_image, out_volume, in_boundbox)
+        return out_volume
 
     @classmethod
     def _compute3d(cls,
@@ -181,9 +196,9 @@ class ExtendImage(ImageOperator):
         if value_backgrnd is None:
             value_backgrnd = in_image[0][0][0]
 
-        out_image = cls._get_init_output(size_output, in_image.dtype, value_backgrnd)
-        SetPatchInImage._compute3d(in_image, out_image, in_boundbox)
-        return out_image
+        out_volume = cls._get_init_output(size_output, in_image.dtype, value_backgrnd)
+        SetImageInVolume._compute3d(in_image, out_volume, in_boundbox)
+        return out_volume
 
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -206,9 +221,7 @@ class CropAndExtendImage(ImageOperator):
         if value_backgrnd is None:
             value_backgrnd = in_image[0][0]
         return ExtendImage._compute2d(CropImage._compute2d(in_image, in_crop_boundbox),
-                                      in_extend_boundbox,
-                                      size_output,
-                                      value_backgrnd)
+                                      in_extend_boundbox, size_output, value_backgrnd)
 
     @staticmethod
     def _compute3d(in_image: np.ndarray,
@@ -220,9 +233,7 @@ class CropAndExtendImage(ImageOperator):
         if value_backgrnd is None:
             value_backgrnd = in_image[0][0][0]
         return ExtendImage._compute3d(CropImage._compute3d(in_image, in_crop_boundbox),
-                                      in_extend_boundbox,
-                                      size_output,
-                                      value_backgrnd)
+                                      in_extend_boundbox, size_output, value_backgrnd)
 
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -299,12 +310,11 @@ class ThresholdImage(ImageOperator):
 
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
-        threshold_val = args[0]
-        return np.where(in_image > threshold_val, cls._value_mask, cls._value_backgrnd).astype(np.uint8)
+        value_threshold = args[0]
+        return np.where(in_image > value_threshold, cls._value_mask, cls._value_backgrnd).astype(np.uint8)
 
 
 class ThinningMask(ImageOperator):
-    # Thinning mask to obtain Centrelines
 
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -366,16 +376,14 @@ class MorphoCloseMask(ImageOperator):
 class ConnectedRegionsMask(ImageOperator):
 
     @staticmethod
-    def _compute_calc(in_image: np.ndarray, connectivity_dim: int) -> np.ndarray:
+    def _compute3d(in_image: np.ndarray, connectivity_dim: int) -> np.ndarray:
         out_image = label(in_image,
                           connectivity=connectivity_dim,
                           background=0)
         return out_image.astype(in_image.dtype)
 
     @staticmethod
-    def compute_get_num_regs(in_image: np.ndarray, connectivity_dim: int = None) -> Tuple[np.ndarray, int]:
-        if connectivity_dim is None:
-            connectivity_dim = in_image.ndim
+    def _compute3d_with_num_regions(in_image: np.ndarray, connectivity_dim: int = None) -> Tuple[np.ndarray, int]:
         (out_image, out_num_regs) = label(in_image,
                                           connectivity=connectivity_dim,
                                           background=0,
@@ -385,7 +393,7 @@ class ConnectedRegionsMask(ImageOperator):
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
         connectivity_dim = kwargs['connectivity_dim'] if 'connectivity_dim' in kwargs.keys() else in_image.ndim
-        return cls._compute_calc(in_image, connectivity_dim)
+        return cls._compute3d(in_image, connectivity_dim)
 
 
 class FirstConnectedRegionMask(ImageOperator):
@@ -393,7 +401,7 @@ class FirstConnectedRegionMask(ImageOperator):
     @classmethod
     def compute(cls, in_image: np.ndarray, *args, **kwargs) -> np.ndarray:
         connectivity_dim = kwargs['connectivity_dim'] if 'connectivity_dim' in kwargs.keys() else in_image.ndim
-        (all_regions, num_regs) = ConnectedRegionsMask.compute_get_num_regs(in_image, connectivity_dim)
+        (all_regions, num_regs) = ConnectedRegionsMask._compute3d_with_num_regions(in_image, connectivity_dim)
 
         # retrieve the conn. region with the largest volume
         max_vol_regs = 0.0

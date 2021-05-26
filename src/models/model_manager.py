@@ -44,7 +44,7 @@ elif TYPE_DNNLIB_USED == 'Keras':
 from models.metrics import MetricBase, MeanSquaredError, MeanSquaredErrorLogarithmic, \
     BinaryCrossEntropy, WeightedBinaryCrossEntropy, WeightedBinaryCrossEntropyFixedWeights, \
     DiceCoefficient, TruePositiveRate, TrueNegativeRate, FalsePositiveRate, FalseNegativeRate, \
-    AirwayCompleteness, AirwayVolumeLeakage, AirwayCentrelineLeakage, AirwayTreeLength, \
+    AirwayMetricBase, AirwayCompleteness, AirwayVolumeLeakage, AirwayCentrelineLeakage, AirwayTreeLength, \
     AirwayCentrelineDistanceFalseNegativeError, AirwayCentrelineDistanceFalsePositiveError, \
     LIST_AVAIL_METRICS
 from models.networks import ConvNetBase
@@ -52,7 +52,7 @@ from models.networks import ConvNetBase
 
 def get_metric(type_metric: str,
                is_mask_exclude: bool = False,
-               **kwargs) -> MetricBase:
+               **kwargs) -> Union[MetricBase, AirwayMetricBase]:
     if type_metric == 'MeanSquaredError':
         return MeanSquaredError(is_mask_exclude=is_mask_exclude)
     if type_metric == 'MeanSquaredErrorLogarithmic':
@@ -86,7 +86,7 @@ def get_metric(type_metric: str,
     elif type_metric == 'AirwayCentrelineDistanceFalseNegativeError':
         return AirwayCentrelineDistanceFalseNegativeError(is_mask_exclude=is_mask_exclude)
     else:
-        message = 'Choice Metric not found: %s. Metrics available: %s' \
+        message = 'Choice Metric not found: \'%s\'. Metrics available: \'%s\'' \
                   % (type_metric, ', '.join(LIST_AVAIL_METRICS))
         catch_error_exception(message)
 
@@ -98,7 +98,7 @@ def get_metric_train(type_metric: str,
         splitels_type_metric = type_metric.split('_')
         if len(splitels_type_metric) != 3:
             message = 'For combined Loss, set metric name as \'Combi_<name_metric1>_<name_metric2>\'. ' \
-                      'Wrong name now: %s' % (type_metric)
+                      'Wrong name now: \'%s\'' % (type_metric)
             catch_error_exception(message)
         type_metric_1 = splitels_type_metric[1]
         type_metric_2 = splitels_type_metric[2]
@@ -133,7 +133,7 @@ def get_metric_train(type_metric: str,
         elif type_metric == 'FalseNegativeRate':
             return FalseNegativeRate_train(is_mask_exclude=is_mask_exclude)
         else:
-            message = 'Choice Metric for Training not found: %s. Metrics available: %s' \
+            message = 'Choice Metric for Training not found: \'%s\'. Metrics available: \'%s\'' \
                       % (type_metric, ', '.join(LIST_AVAIL_METRICS_TRAIN))
             catch_error_exception(message)
 
@@ -152,18 +152,20 @@ def get_network(type_network: str,
                               num_classes_out=num_classes_out)
 
     elif type_network == 'UNet3DGeneral':
-        num_levels = kwargs['num_levels'] if 'num_levels' in kwargs.keys() \
-            else UNet3DGeneral._num_levels_default
-        type_activate_hidden = kwargs['type_activate_hidden'] if 'type_activate_hidden' in kwargs.keys() \
+        num_levels = \
+            kwargs['num_levels'] if 'num_levels' in kwargs.keys() else UNet3DGeneral._num_levels_default
+        type_activate_hidden = \
+            kwargs['type_activate_hidden'] if 'type_activate_hidden' in kwargs.keys() \
             else UNet3DGeneral._type_activate_hidden_default
-        type_activate_output = kwargs['type_activate_output'] if 'type_activate_output' in kwargs.keys() \
+        type_activate_output = \
+            kwargs['type_activate_output'] if 'type_activate_output' in kwargs.keys() \
             else UNet3DGeneral._type_activate_output_default
-        is_use_dropout = kwargs['is_use_dropout'] if 'is_use_dropout' in kwargs.keys() \
-            else False
-        dropout_rate = kwargs['dropout_rate'] if 'dropout_rate' in kwargs.keys() \
-            else UNet3DGeneral._dropout_rate_default
-        is_use_batchnormalize = kwargs['is_use_batchnormalize'] if 'is_use_batchnormalize' in kwargs.keys() \
-            else False
+        is_use_dropout = \
+            kwargs['is_use_dropout'] if 'is_use_dropout' in kwargs.keys() else False
+        dropout_rate = \
+            kwargs['dropout_rate'] if 'dropout_rate' in kwargs.keys() else UNet3DGeneral._dropout_rate_default
+        is_use_batchnormalize = \
+            kwargs['is_use_batchnormalize'] if 'is_use_batchnormalize' in kwargs.keys() else False
 
         return UNet3DGeneral(size_image_in,
                              num_levels=num_levels,
@@ -184,8 +186,8 @@ def get_network(type_network: str,
                             num_classes_out=num_classes_out,
                             is_use_valid_convols=is_use_valid_convols)
     else:
-        message = 'Choice Network not found: %s. Networks available: %s. Please check if you have set is_backward_compat to True if using a pre-trained model.' \
-                  % (type_network, ', '.join(LIST_AVAIL_NETWORKS))
+        message = 'Choice Network not found: \'%s\'. Networks available: \'%s\'. Please check if you have set is_backward_compat to True if using a pre-trained model.' \
+            % (type_network, ', '.join(LIST_AVAIL_NETWORKS))
         catch_error_exception(message)
 
 
@@ -203,7 +205,7 @@ def get_optimizer(type_optimizer: str, learn_rate: float, **kwargs) -> Any:
     elif type_optimizer == 'Adam':
         return get_adam(learn_rate, **kwargs)
     else:
-        message = 'Choice Optimizer not found: %s. Optimizers available: %s' \
+        message = 'Choice Optimizer not found: \'%s\'. Optimizers available: \'%s\'' \
                   % (type_optimizer, ', '.join(LIST_AVAIL_OPTIMIZERS))
         catch_error_exception(message)
 

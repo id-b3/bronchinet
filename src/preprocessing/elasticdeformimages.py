@@ -18,26 +18,29 @@ class ElasticDeformImages(ImageGenerator):
                  fill_mode: str = 'nearest',
                  cval: float = 0.0
                  ) -> None:
-        self._fill_mode = fill_mode
-        self._cval = cval
-
         super(ElasticDeformImages, self).__init__(size_image, num_images=1)
 
-        self._ndims = len(self._size_image)
+        self._fill_mode = fill_mode
+        self._cval = cval
+        self._ndims = len(size_image)
+
+        if (self._ndims != 2) and (self._ndims != 3):
+            message = 'ElasticDeformImages:__init__: wrong \'ndims\': %s' % (self._ndims)
+            catch_error_exception(message)
+
         self._initialize_gendata()
 
     def update_image_data(self, in_shape_image: Tuple[int, ...]) -> None:
         # self._num_images = in_shape_image[0]
         pass
 
-    def _compute_gendata(self, **kwargs) -> None:
-        seed = kwargs['seed']
-        self._gendata_elastic_deform = self._get_calcgendata_elastic_deform(seed)
-        self._is_compute_gendata = False
-
     def _initialize_gendata(self) -> None:
-        self._is_compute_gendata = True
         self._gendata_elastic_deform = None
+        self._count_trans_in_images = 0
+
+    def _update_gendata(self, **kwargs) -> None:
+        seed = kwargs['seed']
+        self._gendata_elastic_deform = self._calc_gendata_elastic_deform(seed)
         self._count_trans_in_images = 0
 
     def _get_image(self, in_image: np.ndarray) -> np.ndarray:
@@ -57,7 +60,7 @@ class ElasticDeformImages(ImageGenerator):
         message = 'Inverse transformation not implemented for Elastic Deformations'
         catch_error_exception(message)
 
-    def _get_calcgendata_elastic_deform(self, seed: int = None) -> np.ndarray:
+    def _calc_gendata_elastic_deform(self, seed: int = None) -> np.ndarray:
         raise NotImplementedError
 
     @classmethod
@@ -87,7 +90,7 @@ class ElasticDeformGridwiseImages(ElasticDeformImages):
 
         super(ElasticDeformGridwiseImages, self).__init__(size_image, fill_mode=fill_mode, cval=cval)
 
-    def _get_calcgendata_elastic_deform(self, seed: int = None) -> np.ndarray:
+    def _calc_gendata_elastic_deform(self, seed: int = None) -> np.ndarray:
         if seed is not None:
             np.random.seed(seed)
 
@@ -110,11 +113,6 @@ class ElasticDeformGridwiseImages(ElasticDeformImages):
                              np.linspace(0, self._points - 1, self._size_image[1]),
                              np.linspace(0, self._points - 1, self._size_image[2]), indexing='ij')
             grid = [self._points, self._points, self._points]
-
-        else:
-            message = 'ElasticDeformGridwiseImages:_get_calcgendata_elastic_deform: ' \
-                      'wrong \'ndims\': %s...' % (self._ndims)
-            catch_error_exception(message)
 
         # creates the deformation along each dimension and then add it to the coordinates
         for i in range(self._ndims):
@@ -151,7 +149,7 @@ class ElasticDeformPixelwiseImages(ElasticDeformImages):
 
         super(ElasticDeformPixelwiseImages, self).__init__(size_image, fill_mode=fill_mode, cval=cval)
 
-    def _get_calcgendata_elastic_deform(self, seed: int = None) -> np.ndarray:
+    def _calc_gendata_elastic_deform(self, seed: int = None) -> np.ndarray:
         if seed is not None:
             np.random.seed(seed)
 
@@ -162,10 +160,6 @@ class ElasticDeformPixelwiseImages(ElasticDeformImages):
             xi_dirs = np.meshgrid(np.arange(self._size_image[0]),
                                   np.arange(self._size_image[1]),
                                   np.arange(self._size_image[2]), indexing='ij')
-        else:
-            message = 'ElasticDeformPixelwiseImages:_get_calcgendata_elastic_deform: ' \
-                      'wrong \'ndims\': %s...' % (self._ndims)
-            catch_error_exception(message)
 
         indices = []
         for i in range(self._ndims):
@@ -182,10 +176,10 @@ class ElasticDeformPixelwiseImages(ElasticDeformImages):
         return cls._type_elastic_deform
 
 
-class ElasticDeformGridwiseImagesGijs(ElasticDeformImages):
+class ElasticDeformGridwiseImagesImproved(ElasticDeformImages):
     _sigma_default = 25
     _points_default = 3
-    _type_elastic_deform = 'Grid-wise_Gijs'
+    _type_elastic_deform = 'Grid-wise_improved'
 
     def __init__(self,
                  size_image: Union[Tuple[int, int, int], Tuple[int, int]],
@@ -197,9 +191,9 @@ class ElasticDeformGridwiseImagesGijs(ElasticDeformImages):
         self._sigma = sigma
         self._points = points
 
-        super(ElasticDeformGridwiseImagesGijs, self).__init__(size_image, fill_mode=fill_mode, cval=cval)
+        super(ElasticDeformGridwiseImagesImproved, self).__init__(size_image, fill_mode=fill_mode, cval=cval)
 
-    def _get_calcgendata_elastic_deform(self, seed: int = None) -> np.ndarray:
+    def _calc_gendata_elastic_deform(self, seed: int = None) -> np.ndarray:
         pass
 
     def _get_image(self, in_image: np.ndarray) -> np.ndarray:

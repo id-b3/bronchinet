@@ -1,4 +1,5 @@
 
+CODEDIR = '/home/antonio/Codes/Antonio_repository/bronchinet/src/'
 DATADIR = '/home/antonio/Data/EXACT_Testing/'
 BASEDIR = '/home/antonio/Results/AirwaySegmentation_EXACT/'
 
@@ -38,27 +39,12 @@ IS_NORMALIZE_DATA = False
 IS_MASK_REGION_INTEREST = True
 IS_CROP_IMAGES = True
 SIZE_BUFFER_BOUNDBOX_BORDERS = (20, 20, 20)
-IS_TWO_BOUNDBOXES_EACH_LUNG = False
+IS_TWO_BOUNDBOXES_LUNGS = False
 IS_SAME_SIZE_BOUNDBOX_ALL_IMAGES = False
 SIZE_FIXED_BOUNDBOX_ALL = None
 IS_CALC_BOUNDBOX_IN_SLICES = False
 IS_RESCALE_IMAGES = False
 FIXED_RESCALE_RESOL = None
-
-
-# DATA AUGMENTATION IN TRAINING
-IS_SLIDING_WINDOW_IMAGES = False
-PROP_OVERLAP_SLIDING_WINDOW = (0.25, 0.0, 0.0)
-IS_RANDOM_WINDOW_IMAGES = True
-NUM_RANDOM_PATCHES_EPOCH = 8
-IS_TRANSFORM_RIGID_IMAGES = True
-TRANS_RIGID_ROTATION_RANGE = (10.0, 7.0, 7.0)   # (plane_XY, plane_XZ, plane_YZ)
-TRANS_RIGID_SHIFT_RANGE = (0.0, 0.0, 0.0)       # (width, height, depth)
-TRANS_RIGID_FLIP_DIRS = (True, True, True)      # (horizontal, vertical, axialdir)
-TRANS_RIGID_ZOOM_RANGE = 0.25                   # scale between (1 - val, 1 + val)
-TRANS_RIGID_FILL_MODE = 'reflect'
-IS_TRANSFORM_ELASTIC_IMAGES = False
-TYPE_TRANS_ELASTIC_DEFORM = 'gridwise'
 
 
 # DISTRIBUTE DATA TRAIN / VALID / TEST
@@ -88,9 +74,22 @@ IS_VALID_CONVOLUTIONS = True
 FREQ_SAVE_CHECK_MODELS = 2
 FREQ_VALIDATE_MODELS = 2
 IS_USE_VALIDATION_DATA = True
-IS_TRANSFORM_VALIDATION_DATA = True
 IS_SHUFFLE_TRAINDATA = True
 MANUAL_SEED_TRAIN = None
+
+
+# DATA AUGMENTATION IN TRAINING
+IS_GENERATE_PATCHES = True
+TYPE_GENERATE_PATCHES = 'random_window'
+PROP_OVERLAP_SLIDE_WINDOW = (0.25, 0.0, 0.0)
+NUM_RANDOM_PATCHES_EPOCH = 4
+IS_TRANSFORM_IMAGES = True
+TYPE_TRANSFORM_IMAGES = 'rigid_trans'
+TRANS_RIGID_ROTATION_RANGE = (10.0, 7.0, 7.0)   # (plane_XY, plane_XZ, plane_YZ)
+TRANS_RIGID_SHIFT_RANGE = (0.0, 0.0, 0.0)       # (width, height, depth)
+TRANS_RIGID_FLIP_DIRS = (True, True, True)      # (horizontal, vertical, axialdir)
+TRANS_RIGID_ZOOM_RANGE = 0.25                   # scale between (1 - val, 1 + val)
+TRANS_RIGID_FILL_MODE = 'reflect'
 
 
 # NOT USED - TRAINING MODELS
@@ -104,7 +103,7 @@ MANUAL_SEED_TRAIN = None
 
 
 # PREDICTIONS / POST-PROCESSING
-PROP_OVERLAP_SLIDING_WINDOW_TEST = (0.5, 0.5, 0.5)
+PROP_OVERLAP_SLIDE_WINDOW_TEST = (0.5, 0.5, 0.5)
 POST_THRESHOLD_VALUE = 0.5
 IS_ATTACH_COARSE_AIRWAYS = True
 IS_REMOVE_TRACHEA_CALC_METRICS = True
@@ -116,5 +115,3 @@ LIST_TYPE_METRICS_RESULT = ['DiceCoefficient',
                             'AirwayCentrelineDistanceFalsePositiveError',
                             'AirwayCentrelineDistanceFalseNegativeError']
 METRIC_EVALUATE_THRESHOLD = 'AirwayVolumeLeakage'
-IS_FILTER_OUT_PROBMAPS_NNET = False
-PROP_FILTER_OUT_PROBMAPS_NNET = 0.75
