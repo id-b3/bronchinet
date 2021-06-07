@@ -47,20 +47,20 @@ class ImageFileReader(object):
         cls._get_filereader_class(filename).write_image(filename, in_image, **kwargs)
 
     @staticmethod
-    def _get_filereader_class(filename: str) -> Any:
+    def _get_filereader_class(filename: str) -> 'ImageFileReader':
         extension = fileextension(filename)
         if extension == '.nii' or extension == '.nii.gz':
             return NiftiReader
+        elif extension == '.dcm':
+            return DicomReader
+        elif extension == '.mhd':
+            return MHDRawReader
         elif extension == '.npy':
             return NumpyReader
         elif extension == '.npz':
             return NumpyZReader
         elif extension == '.hdf5':
             return Hdf5Reader
-        elif extension == '.mhd':
-            return MHDRawReader
-        elif extension == '.dcm':
-            return DicomReader
         else:
             message = "Not valid file extension: %s..." % (extension)
             catch_error_exception(message)
@@ -89,7 +89,7 @@ class NiftiReader(ImageFileReader):
         return cls._update_affine_matrix(in_metadata, rescale_factor, translate_factor)
 
     @classmethod
-    def get_image(cls, filename: str, is_fix_from_dicom2niix: bool = False) -> np.ndarray:
+    def get_image(cls, filename: str) -> np.ndarray:
         out_image = nib.load(filename).get_data()
         return cls._fix_dims_image_read(out_image)
 
