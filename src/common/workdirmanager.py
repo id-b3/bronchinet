@@ -1,7 +1,7 @@
 
-from common.functionutil import join_path_names, is_exist_dir, is_exist_file, currentdir, makedir, \
+from .functionutil import join_path_names, is_exist_dir, is_exist_file, currentdir, makedir, \
     update_dirname, update_filename
-from common.exceptionmanager import catch_error_exception
+from .exceptionmanager import catch_error_exception
 
 
 class GeneralDirManager(object):

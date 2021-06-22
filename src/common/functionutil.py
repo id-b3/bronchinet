@@ -11,7 +11,7 @@ import shutil
 import datetime
 import time
 
-from common.exceptionmanager import catch_error_exception
+from .exceptionmanager import catch_error_exception
 
 
 # to interact with the command shell:
