@@ -224,8 +224,8 @@ def main(args):
                 if args.is_prepare_labels:
                     input_label_file = list_input_labels_files[index]
                     output_label_file = join_path_names(out_path_dirname, basename(input_label_file))
-                    makelink(input_label_file, output_label_file)
                     print("%s --> %s" % (basename(output_label_file), input_label_file))
+                    makelink(input_label_file, output_label_file)
 
                 if args.is_input_extra_labels:
                     input_extra_label_file = list_input_extra_labels_files[index]
@@ -270,9 +270,9 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--basedir', type=str, default=BASEDIR)
-    parser.add_argument('--type_data', type=str, default='training')
+    parser.add_argument('--type_data', type=str, default='training', help='Type of split to do. "testing" for prediction only, "training" for "training". Default: training')
     parser.add_argument('--type_distribute', type=str, default='original')
-    parser.add_argument('--propdata_train_valid_test', type=str2tuple_float, default=PROPDATA_TRAIN_VALID_TEST)
+    parser.add_argument('--propdata_train_valid_test', type=str2tuple_float, default=PROPDATA_TRAIN_VALID_TEST, help='Split of scans for training. If testing, set to "(0,0,1)')
     parser.add_argument('--infile_order_train', type=str, default=None)
     parser.add_argument('--num_folds_crossval', type=str2int, default=None)
     parser.add_argument('--name_input_images_relpath', type=str, default=NAME_PROC_IMAGES_RELPATH)

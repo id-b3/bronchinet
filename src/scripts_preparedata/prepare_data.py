@@ -381,7 +381,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--datadir', type=str, default=DATADIR)
-    parser.add_argument('--is_prepare_labels', type=str2bool, default=True)
+    parser.add_argument('--is_prepare_labels', type=str2bool, default=True, help='Toggle between training preparation and testing preparation. Set to "False" for testing/prediction.')
     parser.add_argument('--is_input_extra_labels', type=str2bool, default=False)
     parser.add_argument('--is_binary_train_masks', type=str2bool, default=IS_BINARY_TRAIN_MASKS)
     parser.add_argument('--is_normalize_data', type=str2bool, default=IS_NORMALIZE_DATA)

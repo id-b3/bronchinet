@@ -10,7 +10,7 @@ Introduction
 
 This software provides functionality to segment airways from CT scans, using deep CNN models, and in particular the U-Net. The implementation of the segmentation method is described in:
 
-- [1] Garcia-Uceda, A., Selvan, R., Saghir, Z., Tiddens, H.A.W.M., de Bruijne, M. Automatic airway segmentation from Computed Tomography using robust and efficient 3-D convolutional neural networks. ArXiv e-prints (2021). arXiv:2103.16328.
+- [1] Garcia-Uceda, A., Selvan, R., Saghir, Z., Tiddens, H.A.W.M., de Bruijne, M. Automatic airway segmentation from computed tomography using robust and efficient 3-D convolutional neural networks. Scientific Reports Nature 11, 16001 (2021). https://doi.org/10.1038/s41598-021-95364-1
 
 If using this software influences positively your project, please cite the above paper.
 
@@ -30,6 +30,8 @@ Project Organization
     ├── requirements.txt        <- The requirements file for reproducing the analysis environment, e.g.
     │                         	   generated with `pip freeze > requirements.txt`
     │
+    ├── scripts_launch          <- Scripts with pipelines and PBS scripts to run in clusters
+    │
     ├── setup.py                <- makes project pip installable (pip install -e .) so src can be imported
     ├── src                     <- Source code for use in this project.
     │   │
@@ -43,7 +45,6 @@ Project Organization
     │   │
     │   ├── scripts_evalresults <- Scripts to evaluate results from models
     │   ├── scripts_experiments <- Scripts to train and test models
-    │   ├── scripts_launch      <- Scripts with pipelines and PBS scripts to run in clusters
     │   ├── scripts_preparedata <- Scripts to prepare data to train models
     │   └── scripts_util        <- Scripts for various utilities
     │
@@ -85,25 +86,37 @@ Before running the scripts, the user needs to prepare the data directory with th
 
 The user needs to prepare the working directory in the desired location, as follows:
 
-1. mkdir <path_working_dir> && cd <path_working_dir>
-2. ln -s <path_data_dir> BaseData
+1. mkdir <path_your_work_dir> && cd <path_your_work_dir>
+2. ln -s <path_your_data_dir> BaseData
 3. ln -s <path_this_repo> Code
 
 ## Run the Scripts
 
 The user needs only to run the scripts in the directories: "scripts_evalresults", "scripts_experiments", "scripts_launch", "scripts_preparedata", "scripts_util". Each script performs a separate and well-defined operation, either to i) prepare data, ii) run experiments, or iii) evaluate results.
 
+<<<<<<< HEAD
+<path_data_stored> should have the folder structure of:
+<path_data_stored>
+    |
+    |--> Airways       - Ground truth segmentations of airways for training the model.
+    |--> CoarseAirways - Coarse segmentations containing the trachea and main bronchi, segmentation must be labeled per branch i.e trachea = 1, main right bronchi = 2 etc.
+    |--> Images        - CT scan(s) to be used in training or prediction.
+    |--> Lungs         - Masks of the lungs.
+
+    All images in the folders should be in the NIFTY format. Use the ./scripts_util/convert_dicom_to_nifty.py script to convert dicom files.
+
+[IF NEEDED] (include in "~/.bashrc" file: export PYTHONPATH=<path_thiscode_stored>/src/")
+=======
 The scripts are called in the command line as follows:
 
 - python <path_script> <mandat_arg1> <mandat_arg2> ... --<option_arg1>=<value> --<option_arg2>=<value> ...
 
   - <mandat_argN>: obligatory arguments (if any), typically for the paths of directories of input / output files
-    
   - <option_argN>: optional arguments, typical for each script. The list of optional arguments for an script can be displayed by:
 
     - python <path_script> --help
 
-  - For optional arguments not indicated in the command line, they take the default values in the source file: "<path_thiscode>/src/common/constant.py"
+  - For optional arguments not indicated in the command line, they take the default values in the source file: "<path_this_repo>/src/common/constant.py"
 
 (IMPORTANT): set the variable PYTHONPATH with the path of this code as follows:
 
@@ -158,9 +171,8 @@ The output prob. maps have the format and dimensions as the working data used fo
 
 - python <path_this_repo>/src/scripts_evalresults/process_predicted_airway_tree.py <path_output_probmaps> <path_output_binmasks> --basedir=<path_work_dir>
 
-4\. (IF NEEDED) Compute the largest connected component of the airway binary masks:
-
-- python <path_this_repo>/src/scripts_util/apply_operation_images.py <path_output_binmasks> <path_output_conn_binmasks> --type=firstconreg
+4) [IF NEEDED] Compute largest connected component of airway binary masks:
+- python ./Code/scripts_util/apply_operation_images.py <path_output_binmasks> <path_output_conn_binmasks> --type=firstconreg --in_conreg_dim=3
 
 - rm -r <path_output_binmasks> && mv <path_output_conn_binmasks> <path_output_binmasks>
 
@@ -183,7 +195,24 @@ Some operations require extra input arguments. To visualize the list of operatio
 Example usage
 ------------
 
-We provide a trained U-Net model with this software, which was used in the above paper for evaluation on the public EXACT'09 dataset. You can use this model to compute airway segmentations on your own CT data. To do this:
-1) create a working directory, and copy there i) the folder with your CT data, and ii) the script 'script_evalEXACT.sh' from this repo
-2) modify the script 'script_evalEXACT.sh' with the desired paths for your own data (check the several user-defined settings available)
-3) run the script: 'bash script_evalEXACT.sh'
+We provide a trained U-Net model with this software, that we used for evaluation on the public EXACT'09 dataset. You can use this model to compute airway segmentations on your own CT data. To do this:
+
+1. Prepare a folder with your own data, following the steps above in "Prepare Data Directory" ("Airways" are not needed)
+
+2. Prepare a working directory, following the steps above in "Prepare Working Directory". Copy there the folder "models" from this repo
+
+3. Run script: "bash models/run_model_trained.sh <path_your_input_data> <path_output_results> --torch"
+
+We also provide a trained model using Tf-Keras instead of Pytorch. To use this one: 
+
+1. Set "TYPE_DNNLIB_USED == 'Keras' " in the source file "<path_this_repo>/src/common/constant.py"
+
+2. Repeat the steps above, but with flag '--keras' instead of '--torch' in step 3)
+
+We also provide a docker image with which you can evaluate the trained model on your own CT data within a docker container. To do this:
+
+1. Prepare a folder with your own data
+
+2. Pull our pre-built docker image: "sudo docker pull antonioguj/bronchinet:stable_torch"
+
+3. Run script: "bash run_docker_models.sh <path_your_input_data> <path_output_results>"

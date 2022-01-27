@@ -14,8 +14,9 @@ def main(args):
         if not is_exist_file(args.list_input_files):
             message = "File \'%s\' not found..." % (args.list_input_files)
             catch_error_exception(message)
-        fout = open(args.list_input_files, 'r')
-        list_input_files = [infile.replace('\n', '') for infile in fout.readlines()]
+
+        with open(args.list_input_files, 'r') as fout:
+            list_input_files = [infile.replace('\n', '') for infile in fout.readlines()]
         print("\'input_files\' = %s" % (list_input_files))
     else:
         list_input_files = [infile.replace('\n', '') for infile in args.input_files]
@@ -90,6 +91,7 @@ def main(args):
                 # add extra field to the dict for output losses, if it doesn't exist already
                 if i_field_train not in dict_data_loss_fields_files.keys():
                     dict_data_loss_fields_files[i_field_train] = []
+                    dict_data_loss_fields_files[i_field_valid] = []
 
                 index_field_train = list_fields.index(i_field_train)
                 index_field_valid = list_fields.index(i_field_valid)
