@@ -205,7 +205,7 @@ def prepare_thinning_operation(args):
 
 def prepare_threshold_operation(args):
     print("Operation: Threshold images...")
-    thres_value = 0.5
+    thres_value = args.threshold
 
     def wrapfun_threshold_image(in_data, i):
         print("Threshold masks to value \'%s\'..." % (thres_value))
@@ -417,7 +417,8 @@ if __name__ == "__main__":
                        'moropen': 'apply a morphological opening to mask (1 layer)',
                        'morclose': 'apply a morphological closing to mask (1 layer)',
                        'thinning': 'apply morphological thinning to mask and obtain centrelines',
-                       'threshold': 'apply threshold of probability image and obtain binary mask',
+                       'threshold': 'apply threshold of probability image and obtain binary mask\n',
+                                '\t\'--threshold\': threshold for process.'
                        'conregs': 'split mask in connected components (output each component with diff. label)\n'
                                   '\t\'--in_conreg_dim\': connectivity dim. (=1: 6-neighbours; =3: 26-neighbours)',
                        'firstconreg': 'split mask in connected components and keep the one with largest volume\n'
@@ -444,6 +445,7 @@ if __name__ == "__main__":
     parser.add_argument('--in_mask_labels', nargs='+', type=int, default=None)
     parser.add_argument('--out_nifti', type=str2bool, default=False)
     parser.add_argument('--no_suffix_outname', type=str2bool, default=None)
+    parser.add_argument('--threshold', type=float, default=0.5, help="Threshold for mask threshold operation.")
     args = parser.parse_args()
 
     for ioperation in args.type:
@@ -477,6 +479,10 @@ if __name__ == "__main__":
     if 'masklabels' in args.type:
         if args.in_mask_labels is None:
             message = 'need to set arguments \'in_mask_labels\''
+            catch_error_exception(message)
+    if 'threshold' in args.type:
+        if args.threshold is None:
+            message = 'need to provide a threshold'
             catch_error_exception(message)
 
     print("Print input arguments...")

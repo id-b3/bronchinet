@@ -54,8 +54,6 @@ def main(args):
             print("Coarse Airways mask file: \'%s\'..." % (basename(in_coarse_airways_file)))
 
             in_coarse_airways = ImageFileReader.get_image(in_coarse_airways_file)
-            # Discard the smaller airways from the coarse airway segmentation.
-            in_coarse_airways = MaskOperator.get_masks_with_labels_list(in_coarse_airways, [2, 3, 4])
 
             out_binary_mask = MaskOperator.merge_two_masks(out_binary_mask, in_coarse_airways)
             # isNot_intersect_masks=True)
