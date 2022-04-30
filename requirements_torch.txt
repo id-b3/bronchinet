@@ -4,14 +4,14 @@
 # external requirements
 elasticdeform==0.4.9
 h5py==2.10.0
-matplotlib==3.2.1
+matplotlib==3.3.4
 nibabel==3.1.0
 numpy==1.18.4
 pandas==1.0.3
 pydicom==1.4.2
 scikit-image==0.17.2
 scikit-learn==0.23.1
-scipy==1.4.1
+scipy==1.5.3
 seaborn==0.10.1
 SimpleITK==1.2.4
 torch==1.8.1
