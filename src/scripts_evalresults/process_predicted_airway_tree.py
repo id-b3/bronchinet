@@ -7,7 +7,7 @@ from common.functionutil import join_path_names, basename, list_files_dir, get_r
     find_file_inlist_with_pattern, str2bool, str2float, read_dictionary
 from common.workdirmanager import TrainDirManager
 from dataloaders.imagefilereader import ImageFileReader
-from imageoperators.imageoperator import ThresholdImage
+from imageoperators.imageoperator import ThresholdImage, FirstConnectedRegionMask
 from imageoperators.maskoperator import MaskOperator
 
 
@@ -56,6 +56,7 @@ def main(args):
             in_coarse_airways = ImageFileReader.get_image(in_coarse_airways_file)
 
             out_binary_mask = MaskOperator.merge_two_masks(out_binary_mask, in_coarse_airways)
+            out_binary_mask = FirstConnectedRegionMask.compute(out_binary_mask, connectivity_dim=1)
             # isNot_intersect_masks=True)
 
         # Output predicted binary masks
